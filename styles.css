@@ -2,187 +2,185 @@
 
 /* Reset and Basic Styles */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    color: #333;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  /* Updated Header Styles */
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  color: #333;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Updated Header Styles */
+header {
+  background-color: #35424a;
+  color: #ffffff;
+  padding: 10px 20px; /* Reduced padding for a more compact header */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Align items to the start (left) */
+}
+
+/* Updated Logo Styles */
+header .logo {
+  width: 40px; /* Reduced width for a smaller logo */
+  height: auto; /* Maintain aspect ratio */
+  margin-right: 10px; /* Space between logo and title */
+}
+
+/* Header Title Styling */
+header h1 {
+  font-size: 1.5em; /* Adjusted font size for balance */
+}
+
+/* Logout Button Styling (for dashboards) */
+header button {
+  margin-left: auto; /* Push the button to the far right */
+  padding: 8px 16px;
+  background-color: #e8491d;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 0.9em;
+}
+
+header button:hover {
+  background-color: #cf3e16;
+}
+
+/* Main Content Styling */
+main {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Authentication Containers */
+.auth-container, .signup-container {
+  max-width: 400px;
+  width: 100%;
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.auth-container h2, .signup-container h2 {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.auth-container form, .signup-container form {
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-container input, .signup-container input {
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 1em;
+}
+
+.auth-container button, .signup-container button {
+  padding: 10px;
+  background-color: #35424a;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 1em;
+}
+
+.auth-container button:hover, .signup-container button:hover {
+  background-color: #2a363f;
+}
+
+.auth-container p, .signup-container p {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.auth-container a, .signup-container a {
+  color: #e8491d;
+  text-decoration: none;
+}
+
+.auth-container a:hover, .signup-container a:hover {
+  text-decoration: underline;
+}
+
+#error-message, #login-error, #signup-error, .error-message {
+  color: #e8491d;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.success-message {
+  color: #28a745;
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* Map Styling */
+#map {
+  width: 100%;
+  height: 500px;
+  margin-top: 20px;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+}
+
+/* Status Messages */
+#status {
+  text-align: center;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+/* Footer Styling */
+footer {
+  background-color: #35424a;
+  color: #ffffff;
+  text-align: center;
+  padding: 10px;
+}
+
+/* Responsive Design for Smaller Screens */
+@media (max-width: 600px) {
   header {
-    background-color: #35424a;
-    color: #ffffff;
-    padding: 10px 20px; /* Reduced padding for a more compact header */
-    display: flex;
-    align-items: center;
-    justify-content: flex-start; /* Align items to the start (left) */
+    padding: 10px 15px; /* Slightly reduced padding */
   }
-  
-  /* Updated Logo Styles */
+
   header .logo {
-    width: 40px; /* Reduced width for a smaller logo */
-    height: auto; /* Maintain aspect ratio */
-    margin-right: 10px; /* Space between logo and title */
+    width: 30px; /* Further reduce logo size on small screens */
+    margin-right: 8px;
   }
-  
-  /* Header Title Styling */
+
   header h1 {
-    font-size: 1.5em; /* Adjusted font size for balance */
+    font-size: 1.2em; /* Adjust font size for smaller screens */
   }
-  
-  /* Logout Button Styling (for dashboards) */
+
   header button {
-    margin-left: auto; /* Push the button to the far right */
-    padding: 8px 16px;
-    background-color: #e8491d;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    border-radius: 5px;
-    font-size: 0.9em;
+    padding: 6px 12px;
+    font-size: 0.8em;
   }
-  
-  header button:hover {
-    background-color: #cf3e16;
-  }
-  
-  /* Main Content Styling */
-  main {
-    flex: 1;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  /* Authentication Containers */
-  .auth-container, .signup-container {
-    max-width: 400px;
-    width: 100%;
-    background-color: #ffffff;
-    padding: 30px;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  }
-  
-  .auth-container h2, .signup-container h2 {
-    margin-bottom: 20px;
-    text-align: center;
-  }
-  
-  .auth-container form, .signup-container form {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .auth-container input, .signup-container input, 
-  .auth-container select, .signup-container select {
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    font-size: 1em;
-  }
-  
-  .auth-container button, .signup-container button {
-    padding: 10px;
-    background-color: #35424a;
-    border: none;
-    color: #ffffff;
-    cursor: pointer;
-    border-radius: 3px;
-    font-size: 1em;
-  }
-  
-  .auth-container button:hover, .signup-container button:hover {
-    background-color: #2a363f;
-  }
-  
-  .auth-container p, .signup-container p {
-    text-align: center;
-    margin-top: 10px;
-  }
-  
-  .auth-container a, .signup-container a {
-    color: #e8491d;
-    text-decoration: none;
-  }
-  
-  .auth-container a:hover, .signup-container a:hover {
-    text-decoration: underline;
-  }
-  
-  #login-error, #signup-error, .error-message {
-    color: #e8491d;
-    margin-top: 10px;
-    text-align: center;
-  }
-  
-  .success-message {
-    color: #28a745;
-    margin-top: 10px;
-    text-align: center;
-  }
-  
-  /* Map Styling */
+
+  /* Adjust map height for mobile devices */
   #map {
-    width: 100%;
-    height: 500px;
-    margin-top: 20px;
-    border: 2px solid #ccc;
-    border-radius: 5px;
+    height: 300px;
   }
-  
-  /* Status Messages */
-  #status {
-    text-align: center;
-    margin-bottom: 10px;
-    font-weight: bold;
+
+  .auth-container, .signup-container {
+    padding: 20px;
   }
-  
-  /* Footer Styling */
-  footer {
-    background-color: #35424a;
-    color: #ffffff;
-    text-align: center;
-    padding: 10px;
-  }
-  
-  /* Responsive Design for Smaller Screens */
-  @media (max-width: 600px) {
-    header {
-      padding: 10px 15px; /* Slightly reduced padding */
-    }
-  
-    header .logo {
-      width: 30px; /* Further reduce logo size on small screens */
-      margin-right: 8px;
-    }
-  
-    header h1 {
-      font-size: 1.2em; /* Adjust font size for smaller screens */
-    }
-  
-    header button {
-      padding: 6px 12px;
-      font-size: 0.8em;
-    }
-  
-    /* Adjust map height for mobile devices */
-    #map {
-      height: 300px;
-    }
-  
-    .auth-container, .signup-container {
-      padding: 20px;
-    }
-  }
-  
+}

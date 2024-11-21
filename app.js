@@ -15,8 +15,11 @@ if (!firebase.apps.length) {
     return database.ref(`users/${userId}/role`).once('value').then(snapshot => snapshot.val());
   }
   
+  // Detect Current Page
+  const page = document.body.id;
+  
   // Landing Page: Handle Sign In and Sign Up
-  if (document.getElementById('login-form') || document.getElementById('signup-form')) {
+  if (page === 'index-page') {
     const loginForm = document.getElementById('login-form');
     const signupForm = document.getElementById('signup-form');
     const signupContainer = document.querySelector('.signup-container');
@@ -74,10 +77,13 @@ if (!firebase.apps.length) {
         clearMessages();
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
-        const role = document.getElementById('role').value;
+  
+        // Debugging Log
+        console.log('Sign-In form submitted');
+        console.log(`Email: ${email}`);
   
         // Basic validation
-        if (!email || !password || !role) {
+        if (!email || !password) {
           loginErrorDiv.textContent = 'Please fill in all fields.';
           return;
         }
@@ -90,19 +96,23 @@ if (!firebase.apps.length) {
               auth.signOut();
               return;
             }
-            // Retrieve the user's role from the database to ensure consistency
+            // Retrieve the user's role from the database
             getUserRole(user.uid).then(storedRole => {
-              if (storedRole !== role) {
-                // Role mismatch
-                loginErrorDiv.textContent = 'Role does not match our records.';
-                auth.signOut(); // Sign out the user
+              if (!storedRole) {
+                // If no role is assigned, handle accordingly
+                loginErrorDiv.textContent = 'No role assigned. Please contact support.';
+                auth.signOut();
                 return;
               }
               // Redirect based on role
-              if (role === 'driver') {
+              if (storedRole === 'driver') {
                 window.location.href = 'driver.html';
-              } else if (role === 'overseer') {
+              } else if (storedRole === 'overseer') {
                 window.location.href = 'overseer.html';
+              } else {
+                // Handle undefined roles
+                loginErrorDiv.textContent = 'Undefined role. Please contact support.';
+                auth.signOut();
               }
             });
           })
@@ -121,10 +131,13 @@ if (!firebase.apps.length) {
         const email = document.getElementById('signup-email').value.trim();
         const password = document.getElementById('signup-password').value;
         const confirmPassword = document.getElementById('signup-confirm-password').value;
-        const role = document.getElementById('signup-role').value;
+  
+        // Debugging Log
+        console.log('Sign-Up form submitted');
+        console.log(`Email: ${email}`);
   
         // Basic validation
-        if (!email || !password || !confirmPassword || !role) {
+        if (!email || !password || !confirmPassword) {
           signupErrorDiv.textContent = 'Please fill in all fields.';
           return;
         }
@@ -144,21 +157,26 @@ if (!firebase.apps.length) {
         auth.createUserWithEmailAndPassword(email, password)
           .then(userCredential => {
             const user = userCredential.user;
-            // Save role in database
+            // Assign a default role (e.g., 'driver') or handle role assignment separately
             return database.ref(`users/${user.uid}`).set({
-              role: role,
-              email: email
-            }).then(() => {
-              // Send verification email
-              return user.sendEmailVerification();
-            }).then(() => {
-              // Display success message
-              signupSuccessDiv.textContent = 'Account created successfully! Please verify your email before signing in.';
-              // Optionally, redirect after a delay
-              // setTimeout(() => {
-              //   window.location.href = 'index.html';
-              // }, 3000);
+              email: email,
+              role: 'driver' // Assign default role
             });
+          })
+          .then(() => {
+            // Send verification email
+            const user = auth.currentUser;
+            if (user) {
+              return user.sendEmailVerification();
+            }
+          })
+          .then(() => {
+            // Display success message
+            signupSuccessDiv.textContent = 'Account created successfully! Please verify your email before signing in.';
+            // Optionally, redirect after a short delay
+            // setTimeout(() => {
+            //   window.location.href = 'index.html';
+            // }, 3000);
           })
           .catch(error => {
             // Handle Firebase authentication errors
@@ -200,7 +218,7 @@ if (!firebase.apps.length) {
   }
   
   // Driver Page: Share Location
-  if (document.getElementById('driver.html') || document.getElementById('map')) {
+  if (page === 'driver-page') {
     const statusDiv = document.getElementById('status');
     const logoutButton = document.getElementById('logout-button');
   
@@ -214,7 +232,7 @@ if (!firebase.apps.length) {
         driverId = user.uid;
         statusDiv.textContent = 'Fetching your location...';
   
-        // Initialize Map
+        // Initialize Map (optional: show driver's own location)
         map = L.map('map').setView([0, 0], 2); // Default view
   
         // Add OpenStreetMap tiles
@@ -282,7 +300,7 @@ if (!firebase.apps.length) {
   }
   
   // Overseer Page: View All Drivers
-  if (document.getElementById('overseer.html') || document.getElementById('map')) {
+  if (page === 'overseer-page') {
     const statusDiv = document.getElementById('status');
     const logoutButton = document.getElementById('logout-button');
   
