@@ -14,10 +14,14 @@ document.addEventListener('DOMContentLoaded', () => {
   
     // Utility function to get user roles
     function getUserRoles(userId) {
+      console.log(`Fetching roles for user ID: ${userId}`);
       return database.ref(`users/${userId}/roles`).once('value').then(snapshot => {
         const roles = snapshot.val();
         console.log(`Fetched roles for user ${userId}: ${JSON.stringify(roles)}`);
         return roles;
+      }).catch(error => {
+        console.error('Error fetching user roles:', error);
+        return null;
       });
     }
   
@@ -42,16 +46,16 @@ document.addEventListener('DOMContentLoaded', () => {
       signupLink.addEventListener('click', (e) => {
         e.preventDefault();
         console.log('Sign Up link clicked.');
-        loginForm.style.display = 'none';
-        signupForm.style.display = 'block';
+        authContainer.style.display = 'none';
+        signupContainer.style.display = 'block';
         clearMessages();
       });
   
       loginLink.addEventListener('click', (e) => {
         e.preventDefault();
         console.log('Sign In link clicked.');
-        signupForm.style.display = 'none';
-        loginForm.style.display = 'block';
+        signupContainer.style.display = 'none';
+        authContainer.style.display = 'block';
         clearMessages();
       });
   
@@ -134,6 +138,10 @@ document.addEventListener('DOMContentLoaded', () => {
                   loginErrorDiv.textContent = `You do not have the '${selectedRole}' role. Please contact support.`;
                   auth.signOut();
                 }
+              }).catch(error => {
+                console.error('Error retrieving user roles:', error);
+                loginErrorDiv.textContent = 'Error retrieving user roles.';
+                auth.signOut();
               });
             })
             .catch(error => {
@@ -180,12 +188,12 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(userCredential => {
               const user = userCredential.user;
               console.log('User created:', user.email);
-              // Assign default role: driver
+              // Assign default roles: driver and overseer
               return database.ref(`users/${user.uid}`).set({
                 email: email,
                 roles: {
-                  driver: true, // Default role
-                  overseer: true
+                  driver: true,     // Default role
+                  overseer: false   // Initially false; can be updated manually
                 }
               });
             })
@@ -193,7 +201,10 @@ document.addEventListener('DOMContentLoaded', () => {
               // Send verification email
               const user = auth.currentUser;
               if (user) {
+                console.log('Sending email verification...');
                 return user.sendEmailVerification();
+              } else {
+                throw new Error('User not found after sign-up.');
               }
             })
             .then(() => {
@@ -246,12 +257,185 @@ document.addEventListener('DOMContentLoaded', () => {
   
     // Driver Page: Share Location
     if (page === 'driver-page') {
-      // Driver dashboard code...
+      const statusDiv = document.getElementById('status');
+      const logoutButton = document.getElementById('logout-button');
+  
+      let driverId = null;
+      let locationInterval = null;
+      let map = null;
+      let marker = null;
+  
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          driverId = user.uid;
+          console.log(`Driver logged in: ${user.email}, UID: ${driverId}`);
+          statusDiv.textContent = 'Fetching your location...';
+  
+          // Initialize Map
+          map = L.map('map').setView([0, 0], 2); // Default view
+          console.log('Map initialized.');
+  
+          // Add OpenStreetMap tiles
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+          }).addTo(map);
+          console.log('Leaflet tiles added to map.');
+  
+          // Request Geolocation
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(position => {
+              const { latitude, longitude } = position.coords;
+              console.log('Initial location fetched:', latitude, longitude);
+              updateLocation(latitude, longitude);
+              map.setView([latitude, longitude], 13);
+              marker = L.marker([latitude, longitude]).addTo(map)
+                .bindPopup('You are here.').openPopup();
+              console.log('Marker added to map.');
+  
+              // Update location every minute
+              locationInterval = setInterval(() => {
+                navigator.geolocation.getCurrentPosition(pos => {
+                  const { latitude, longitude } = pos.coords;
+                  console.log('Periodic location update:', latitude, longitude);
+                  updateLocation(latitude, longitude);
+                  map.setView([latitude, longitude], 13);
+                  marker.setLatLng([latitude, longitude]);
+                }, err => {
+                  console.error('Error fetching location:', err);
+                  statusDiv.textContent = 'Error fetching location.';
+                });
+              }, 60000); // 60000ms = 1 minute
+  
+            }, error => {
+              console.error('Geolocation error:', error);
+              statusDiv.textContent = 'Error fetching location: ' + error.message;
+            });
+          } else {
+            console.error('Geolocation not supported.');
+            statusDiv.textContent = 'Geolocation is not supported by your browser.';
+          }
+  
+          // Function to update location in Firebase
+          function updateLocation(lat, lng) {
+            statusDiv.textContent = 'Updating your location...';
+            console.log(`Attempting to update location for UID: ${driverId}`);
+            database.ref(`drivers/${driverId}`).set({
+              latitude: lat,
+              longitude: lng,
+              timestamp: firebase.database.ServerValue.TIMESTAMP
+            })
+            .then(() => {
+              console.log('Location updated in Firebase:', lat, lng);
+              statusDiv.textContent = 'Location updated.';
+            })
+            .catch(error => {
+              console.error('Error updating location in Firebase:', error);
+              statusDiv.textContent = 'Error updating location.';
+            });
+          }
+        } else {
+          // No user is signed in, redirect to landing page
+          console.warn('No user is signed in. Redirecting to sign-in page.');
+          window.location.href = 'index.html';
+        }
+      });
+  
+      // Handle Logout
+      if (logoutButton) {
+        logoutButton.addEventListener('click', () => {
+          auth.signOut().then(() => {
+            console.log('User signed out.');
+            // Clear interval
+            if (locationInterval) clearInterval(locationInterval);
+            window.location.href = 'index.html';
+          }).catch(error => {
+            console.error('Error signing out:', error);
+          });
+        });
+      }
     }
   
     // Overseer Page: View All Drivers
     if (page === 'overseer-page') {
-      // Overseer dashboard code...
-    }
-  });
+      const statusDiv = document.getElementById('status');
+      const logoutButton = document.getElementById('logout-button');
   
+      let map = null;
+      let markers = {};
+  
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          // Verify that the user is an overseer
+          getUserRoles(user.uid).then(userRoles => {
+            if (!userRoles || !userRoles.overseer) {
+              console.warn('Access denied. User is not an overseer.');
+              alert('Access denied. Only overseers can view driver locations.');
+              auth.signOut();
+              window.location.href = 'index.html';
+              return;
+            }
+  
+            console.log('Overseer logged in:', user.email);
+  
+            // Initialize Map
+            map = L.map('map').setView([0, 0], 2); // Default view
+            console.log('Map initialized.');
+  
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            console.log('Leaflet tiles added to map.');
+  
+            // Listen for drivers' location updates
+            database.ref('drivers').on('value', snapshot => {
+              const drivers = snapshot.val();
+              console.log('Drivers data fetched:', drivers);
+              if (drivers) {
+                statusDiv.textContent = 'Viewing all drivers.';
+                for (const [id, data] of Object.entries(drivers)) {
+                  const { latitude, longitude, timestamp } = data;
+                  if (markers[id]) {
+                    markers[id].setLatLng([latitude, longitude]);
+                    markers[id].getPopup().setContent(`Driver ID: ${id}<br>Last Updated: ${new Date(timestamp).toLocaleString()}`);
+                  } else {
+                    markers[id] = L.marker([latitude, longitude]).addTo(map)
+                      .bindPopup(`Driver ID: ${id}<br>Last Updated: ${new Date(timestamp).toLocaleString()}`);
+                  }
+                }
+              } else {
+                statusDiv.textContent = 'No drivers are currently active.';
+                // Remove existing markers if any
+                for (const id in markers) {
+                  map.removeLayer(markers[id]);
+                  delete markers[id];
+                }
+              }
+            }, error => {
+              console.error('Error fetching drivers:', error);
+              statusDiv.textContent = 'Error fetching driver locations.';
+            });
+          }).catch(error => {
+            console.error('Error fetching user roles:', error);
+            statusDiv.textContent = 'Error verifying user role.';
+          });
+        } else {
+          // No user is signed in, redirect to landing page
+          console.warn('No user is signed in. Redirecting to sign-in page.');
+          window.location.href = 'index.html';
+        }
+      });
+  
+      // Handle Logout
+      if (logoutButton) {
+        logoutButton.addEventListener('click', () => {
+          auth.signOut().then(() => {
+            console.log('User signed out.');
+            window.location.href = 'index.html';
+          }).catch(error => {
+            console.error('Error signing out:', error);
+          });
+        });
+      }
+    }
+});
