@@ -1,6 +1,6 @@
 /* styles.css */
 
-/* Reset and basic styles */
+/* Reset and Basic Styles */
 * {
     margin: 0;
     padding: 0;
@@ -16,25 +16,45 @@
     flex-direction: column;
   }
   
+  /* Updated Header Styles */
   header {
     background-color: #35424a;
     color: #ffffff;
-    padding: 20px;
+    padding: 10px 20px; /* Reduced padding for a more compact header */
     display: flex;
     align-items: center;
-    justify-content: center;
-    position: relative;
+    justify-content: flex-start; /* Align items to the start (left) */
   }
   
+  /* Updated Logo Styles */
   header .logo {
-    width: 50px;
-    margin-right: 10px;
+    width: 40px; /* Reduced width for a smaller logo */
+    height: auto; /* Maintain aspect ratio */
+    margin-right: 10px; /* Space between logo and title */
   }
   
+  /* Header Title Styling */
   header h1 {
-    font-size: 1.8em;
+    font-size: 1.5em; /* Adjusted font size for balance */
   }
   
+  /* Logout Button Styling (for dashboards) */
+  header button {
+    margin-left: auto; /* Push the button to the far right */
+    padding: 8px 16px;
+    background-color: #e8491d;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 0.9em;
+  }
+  
+  header button:hover {
+    background-color: #cf3e16;
+  }
+  
+  /* Main Content Styling */
   main {
     flex: 1;
     padding: 20px;
@@ -43,6 +63,7 @@
     align-items: center;
   }
   
+  /* Authentication Containers */
   .auth-container, .signup-container {
     max-width: 400px;
     width: 100%;
@@ -99,7 +120,7 @@
     text-decoration: underline;
   }
   
-  #error-message, .error-message {
+  #login-error, #signup-error, .error-message {
     color: #e8491d;
     margin-top: 10px;
     text-align: center;
@@ -111,6 +132,23 @@
     text-align: center;
   }
   
+  /* Map Styling */
+  #map {
+    width: 100%;
+    height: 500px;
+    margin-top: 20px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  /* Status Messages */
+  #status {
+    text-align: center;
+    margin-bottom: 10px;
+    font-weight: bold;
+  }
+  
+  /* Footer Styling */
   footer {
     background-color: #35424a;
     color: #ffffff;
@@ -118,10 +156,29 @@
     padding: 10px;
   }
   
-  /* Responsive Design */
+  /* Responsive Design for Smaller Screens */
   @media (max-width: 600px) {
+    header {
+      padding: 10px 15px; /* Slightly reduced padding */
+    }
+  
+    header .logo {
+      width: 30px; /* Further reduce logo size on small screens */
+      margin-right: 8px;
+    }
+  
     header h1 {
-      font-size: 1.2em;
+      font-size: 1.2em; /* Adjust font size for smaller screens */
+    }
+  
+    header button {
+      padding: 6px 12px;
+      font-size: 0.8em;
+    }
+  
+    /* Adjust map height for mobile devices */
+    #map {
+      height: 300px;
     }
   
     .auth-container, .signup-container {
