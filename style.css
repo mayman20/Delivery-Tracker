@@ -1,0 +1,71 @@
+/* Reset some basic elements */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    line-height: 1.6;
+  }
+  
+  header {
+    background-color: #35424a;
+    color: #ffffff;
+    padding: 20px 0;
+    text-align: center;
+  }
+  
+  header .logo {
+    width: 50px;
+    vertical-align: middle;
+  }
+  
+  header h1 {
+    display: inline;
+    margin-left: 10px;
+    font-size: 2em;
+  }
+  
+  main {
+    padding: 20px;
+  }
+  
+  #deliveries-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .delivery-card {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 300px;
+    margin: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  .delivery-card h2 {
+    margin-bottom: 10px;
+    color: #35424a;
+  }
+  
+  .delivery-card p {
+    margin-bottom: 5px;
+  }
+  
+  footer {
+    background-color: #35424a;
+    color: #ffffff;
+    text-align: center;
+    padding: 10px 0;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+  }
+  
