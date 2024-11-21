@@ -184,7 +184,8 @@ document.addEventListener('DOMContentLoaded', () => {
               return database.ref(`users/${user.uid}`).set({
                 email: email,
                 roles: {
-                  driver: true // Default role
+                  driver: true, // Default role
+                  overseer: true
                 }
               });
             })
