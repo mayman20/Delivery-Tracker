@@ -1,5 +1,3 @@
-// app.js
-
 document.addEventListener('DOMContentLoaded', () => {
     // Ensure Firebase is initialized
     if (!firebase.apps.length) {
@@ -14,14 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
   
     // Utility function to get user roles
     function getUserRoles(userId) {
-      console.log(`Fetching roles for user ID: ${userId}`);
       return database.ref(`users/${userId}/roles`).once('value').then(snapshot => {
         const roles = snapshot.val();
         console.log(`Fetched roles for user ${userId}: ${JSON.stringify(roles)}`);
         return roles;
-      }).catch(error => {
-        console.error('Error fetching user roles:', error);
-        return null;
       });
     }
   
@@ -46,16 +40,16 @@ document.addEventListener('DOMContentLoaded', () => {
       signupLink.addEventListener('click', (e) => {
         e.preventDefault();
         console.log('Sign Up link clicked.');
-        authContainer.style.display = 'none';
-        signupContainer.style.display = 'block';
+        loginForm.style.display = 'none';
+        signupForm.style.display = 'block';
         clearMessages();
       });
   
       loginLink.addEventListener('click', (e) => {
         e.preventDefault();
         console.log('Sign In link clicked.');
-        signupContainer.style.display = 'none';
-        authContainer.style.display = 'block';
+        signupForm.style.display = 'none';
+        loginForm.style.display = 'block';
         clearMessages();
       });
   
@@ -138,10 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
                   loginErrorDiv.textContent = `You do not have the '${selectedRole}' role. Please contact support.`;
                   auth.signOut();
                 }
-              }).catch(error => {
-                console.error('Error retrieving user roles:', error);
-                loginErrorDiv.textContent = 'Error retrieving user roles.';
-                auth.signOut();
               });
             })
             .catch(error => {
@@ -188,12 +178,11 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(userCredential => {
               const user = userCredential.user;
               console.log('User created:', user.email);
-              // Assign default roles: driver and overseer
+              // Assign default role: driver
               return database.ref(`users/${user.uid}`).set({
                 email: email,
                 roles: {
-                  driver: true,     // Default role
-                  overseer: false   // Initially false; can be updated manually
+                  driver: true // Default role
                 }
               });
             })
@@ -201,10 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
               // Send verification email
               const user = auth.currentUser;
               if (user) {
-                console.log('Sending email verification...');
                 return user.sendEmailVerification();
-              } else {
-                throw new Error('User not found after sign-up.');
               }
             })
             .then(() => {
