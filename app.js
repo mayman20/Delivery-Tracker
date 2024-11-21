@@ -13,8 +13,8 @@ if (!firebase.apps.length) {
   const auth = firebase.auth();
   const database = firebase.database();
   
-  // Utility function to get current user role
-  function getUserRole(userId) {
+  // Utility function to get current user roles
+  function getUserRoles(userId) {
     return database.ref(`users/${userId}/roles`).once('value').then(snapshot => {
       const roles = snapshot.val();
       console.log(`Fetched roles for user ${userId}: ${JSON.stringify(roles)}`);
@@ -115,9 +115,7 @@ if (!firebase.apps.length) {
               return;
             }
             // Retrieve the user's roles from the database
-            database.ref(`users/${user.uid}/roles`).once('value').then(snapshot => {
-              const userRoles = snapshot.val();
-              console.log(`User roles: ${JSON.stringify(userRoles)}`);
+            getUserRoles(user.uid).then(userRoles => {
               if (userRoles && userRoles[selectedRole]) {
                 // User has the selected role
                 if (selectedRole === 'driver') {
@@ -155,11 +153,7 @@ if (!firebase.apps.length) {
         const password = document.getElementById('signup-password').value;
         const confirmPassword = document.getElementById('signup-confirm-password').value;
   
-        // Collect selected roles
-        const roleCheckboxes = document.querySelectorAll('input[name="signup-role"]:checked');
-        const selectedRoles = Array.from(roleCheckboxes).map(checkbox => checkbox.value);
-        
-        console.log(`Attempting to sign up user: ${email} with roles: ${selectedRoles}`);
+        console.log(`Attempting to sign up user: ${email}`);
   
         // Basic validation
         if (!email || !password || !confirmPassword) {
@@ -182,26 +176,17 @@ if (!firebase.apps.length) {
           return;
         }
   
-        // Validate that at least one role is selected
-        if (selectedRoles.length === 0) {
-          console.warn('Sign-Up: No roles selected.');
-          signupErrorDiv.textContent = 'Please select at least one role.';
-          return;
-        }
-  
-        // Create user
+        // Create user and assign default role (driver)
         auth.createUserWithEmailAndPassword(email, password)
           .then(userCredential => {
             const user = userCredential.user;
             console.log('User created:', user.email);
-            // Assign selected roles
-            const rolesObject = {};
-            selectedRoles.forEach(role => {
-              rolesObject[role] = true;
-            });
+            // Assign default role: driver
             return database.ref(`users/${user.uid}`).set({
               email: email,
-              roles: rolesObject
+              roles: {
+                driver: true // Default role
+              }
             });
           })
           .then(() => {
@@ -275,7 +260,7 @@ if (!firebase.apps.length) {
         console.log(`Driver logged in: ${user.email}, UID: ${driverId}`);
         statusDiv.textContent = 'Fetching your location...';
   
-        // Initialize Map (optional: show driver's own location)
+        // Initialize Map
         map = L.map('map').setView([0, 0], 2); // Default view
         console.log('Map initialized.');
   
@@ -321,7 +306,8 @@ if (!firebase.apps.length) {
   
         // Function to update location in Firebase
         function updateLocation(lat, lng) {
-          statusDiv.textContent = 'Location updated.';
+          statusDiv.textContent = 'Updating your location...';
+          console.log(`Attempting to update location for UID: ${driverId}`);
           database.ref(`drivers/${driverId}`).set({
             latitude: lat,
             longitude: lng,
@@ -329,6 +315,7 @@ if (!firebase.apps.length) {
           })
           .then(() => {
             console.log('Location updated in Firebase:', lat, lng);
+            statusDiv.textContent = 'Location updated.';
           })
           .catch(error => {
             console.error('Error updating location in Firebase:', error);
@@ -368,8 +355,8 @@ if (!firebase.apps.length) {
     auth.onAuthStateChanged(user => {
       if (user) {
         // Verify that the user is an overseer
-        getUserRole(user.uid).then(role => {
-          if (!role || !role.overseer) {
+        getUserRoles(user.uid).then(userRoles => {
+          if (!userRoles || !userRoles.overseer) {
             console.warn('Access denied. User is not an overseer.');
             alert('Access denied. Only overseers can view driver locations.');
             auth.signOut();
@@ -425,12 +412,12 @@ if (!firebase.apps.length) {
       }
     });
   
-    // Function to get user role
-    function getUserRole(userId) {
+    // Function to get user roles
+    function getUserRoles(userId) {
       return database.ref(`users/${userId}/roles`).once('value').then(snapshot => {
-        const role = snapshot.val();
-        console.log(`Fetched roles for user ${userId}: ${JSON.stringify(role)}`);
-        return role;
+        const roles = snapshot.val();
+        console.log(`Fetched roles for user ${userId}: ${JSON.stringify(roles)}`);
+        return roles;
       });
     }
   
