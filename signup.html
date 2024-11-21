@@ -1,0 +1,66 @@
+<!-- signup.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign Up - Delivery Driver Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Leaflet CSS (if you plan to use maps on the sign-up page) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body id="signup-page">
+  <header>
+    <img src="assets/logo.png" alt="Company Logo" id="logo">
+    <!-- Optional: Add navigation links or other header content -->
+  </header>
+
+  <main>
+    <div class="signup-container">
+      <form id="signup-form">
+        <h2>Create an Account</h2>
+        
+        <div>
+          <label for="signup-email">Email:</label>
+          <input type="email" id="signup-email" required placeholder="Enter your email">
+        </div>
+        
+        <div>
+          <label for="signup-password">Password:</label>
+          <input type="password" id="signup-password" required placeholder="Enter your password">
+        </div>
+        
+        <div>
+          <label for="signup-confirm-password">Confirm Password:</label>
+          <input type="password" id="signup-confirm-password" required placeholder="Confirm your password">
+        </div>
+        
+        <button type="submit">Sign Up</button>
+        
+        <div id="signup-error" class="error-message"></div>
+        <div id="signup-success" class="success-message"></div>
+        
+        <p>Already have an account? <a href="index.html">Sign In</a></p>
+      </form>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2024 Delivery Driver Tracker</p>
+  </footer>
+
+  <!-- Leaflet JS (if needed) -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  
+  <!-- Firebase Configuration -->
+  <script src="firebase-config.js"></script>
+  
+  <!-- Sign-Up JavaScript -->
+  <script src="signup.js"></script>
+</body>
+</html>

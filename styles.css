@@ -1,51 +1,42 @@
 /* styles.css */
 
+/* Reset some basic styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body Styling */
 body {
   font-family: Arial, sans-serif;
   background-color: #f5f5f5;
-  margin: 0;
-  padding: 0;
 }
 
+/* Header Styling */
+header {
+  text-align: center;
+  padding: 20px 0;
+  background-color: #007bff;
+}
+
+/* Logo Styling */
 #logo {
   width: 150px;       /* Adjust as needed */
   height: auto;
   max-width: 100%;
-  display: block;     /* Centers the logo if the container has text-align: center */
-  margin: 0 auto;     /* Centers the logo horizontally */
+  display: block;
+  margin: 0 auto;
 }
 
-header {
-  background-color: #007bff;
-  color: white;
-  padding: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-header h1 {
-  margin: 0;
-}
-
-header button {
-  padding: 10px 20px;
-  background-color: #dc3545;
-  border: none;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-header button:hover {
-  background-color: #c82333;
-}
-
+/* Main Content Styling */
 main {
   padding: 20px;
 }
 
-.auth-container {
+/* Authentication Container Styling */
+.auth-container,
+.signup-container {
   width: 300px;
   margin: 50px auto;
   padding: 30px;
@@ -54,23 +45,28 @@ main {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.auth-container form div {
+.auth-container form div,
+.signup-container form div {
   margin-bottom: 15px;
 }
 
-.auth-container form label {
+.auth-container form label,
+.signup-container form label {
   display: block;
   margin-bottom: 5px;
 }
 
 .auth-container form input[type="email"],
-.auth-container form input[type="password"] {
+.signup-container form input[type="email"],
+.auth-container form input[type="password"],
+.signup-container form input[type="password"] {
   width: 100%;
   padding: 8px;
   box-sizing: border-box;
 }
 
-.auth-container form button {
+.auth-container form button,
+.signup-container form button {
   width: 100%;
   padding: 10px;
   background-color: #28a745;
@@ -80,7 +76,8 @@ main {
   cursor: pointer;
 }
 
-.auth-container form button:hover {
+.auth-container form button:hover,
+.signup-container form button:hover {
   background-color: #218838;
 }
 
@@ -104,8 +101,15 @@ footer {
   bottom: 0;
 }
 
-#map {
-  height: 500px;
-  width: 100%;
-  margin-top: 20px;
+/* Responsive Logo Styling */
+@media (max-width: 600px) {
+  #logo {
+    width: 100px; /* Adjust for smaller screens */
+  }
+
+  .auth-container,
+  .signup-container {
+    width: 90%;
+    padding: 20px;
+  }
 }

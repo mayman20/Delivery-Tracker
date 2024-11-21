@@ -1,3 +1,5 @@
+// app.js
+
 document.addEventListener('DOMContentLoaded', () => {
     // Ensure Firebase is initialized
     if (!firebase.apps.length) {
@@ -12,10 +14,14 @@ document.addEventListener('DOMContentLoaded', () => {
   
     // Utility function to get user roles
     function getUserRoles(userId) {
+      console.log(`Fetching roles for user ID: ${userId}`);
       return database.ref(`users/${userId}/roles`).once('value').then(snapshot => {
         const roles = snapshot.val();
         console.log(`Fetched roles for user ${userId}: ${JSON.stringify(roles)}`);
         return roles;
+      }).catch(error => {
+        console.error('Error fetching user roles:', error);
+        return null;
       });
     }
   
@@ -23,36 +29,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const page = document.body.id;
     console.log(`Current page: ${page}`);
   
-    // Landing Page: Handle Sign In and Sign Up
+    // Landing Page: Handle Sign In (Sign-Up handled separately)
     if (page === 'index-page') {
       const loginForm = document.getElementById('login-form');
-      const signupForm = document.getElementById('signup-form');
-      const signupContainer = document.querySelector('.signup-container');
-      const authContainer = document.querySelector('.auth-container');
       const signupLink = document.getElementById('signup-link');
-      const loginLink = document.getElementById('login-link');
-      const forgotPasswordLink = document.getElementById('forgot-password-link');
       const loginErrorDiv = document.getElementById('login-error');
-      const signupErrorDiv = document.getElementById('signup-error');
-      const signupSuccessDiv = document.getElementById('signup-success');
-  
-      // Toggle between login and signup forms
-      signupLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        console.log('Sign Up link clicked.');
-        loginForm.style.display = 'none';
-        signupForm.style.display = 'block';
-        clearMessages();
-      });
-  
-      loginLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        console.log('Sign In link clicked.');
-        signupForm.style.display = 'none';
-        loginForm.style.display = 'block';
-        clearMessages();
-      });
-  
+      const forgotPasswordLink = document.getElementById('forgot-password-link');
+    
       // Handle Forgot Password
       if (forgotPasswordLink) {
         forgotPasswordLink.addEventListener('click', (e) => {
@@ -73,18 +56,34 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
   
-      // Function to clear error and success messages
-      function clearMessages() {
-        if (loginErrorDiv) loginErrorDiv.textContent = '';
-        if (signupErrorDiv) signupErrorDiv.textContent = '';
-        if (signupSuccessDiv) signupSuccessDiv.textContent = '';
+      // Function to handle and display Firebase authentication errors
+      function handleAuthErrors(error, displayDiv) {
+        let message = '';
+        switch (error.code) {
+          case 'auth/invalid-email':
+            message = 'Invalid email address.';
+            break;
+          case 'auth/user-disabled':
+            message = 'This user has been disabled.';
+            break;
+          case 'auth/user-not-found':
+            message = 'No user found with this email.';
+            break;
+          case 'auth/wrong-password':
+            message = 'Incorrect password.';
+            break;
+          default:
+            message = 'An error occurred. Please try again.';
+        }
+        displayDiv.textContent = message;
       }
   
       // Handle Sign In
       if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
           e.preventDefault();
-          clearMessages();
+          loginErrorDiv.textContent = '';
+  
           const email = document.getElementById('email').value.trim();
           const password = document.getElementById('password').value;
           
@@ -132,6 +131,10 @@ document.addEventListener('DOMContentLoaded', () => {
                   loginErrorDiv.textContent = `You do not have the '${selectedRole}' role. Please contact support.`;
                   auth.signOut();
                 }
+              }).catch(error => {
+                console.error('Error retrieving user roles:', error);
+                loginErrorDiv.textContent = 'Error retrieving user roles.';
+                auth.signOut();
               });
             })
             .catch(error => {
@@ -141,103 +144,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
   
-      // Handle Sign Up
-      if (signupForm) {
-        signupForm.addEventListener('submit', (e) => {
+      // Navigation to Sign-Up Page
+      if (signupLink) {
+        signupLink.addEventListener('click', (e) => {
           e.preventDefault();
-          clearMessages();
-          const email = document.getElementById('signup-email').value.trim();
-          const password = document.getElementById('signup-password').value;
-          const confirmPassword = document.getElementById('signup-confirm-password').value;
-  
-          console.log(`Attempting to sign up user: ${email}`);
-  
-          // Basic validation
-          if (!email || !password || !confirmPassword) {
-            console.warn('Sign-Up: Missing fields.');
-            signupErrorDiv.textContent = 'Please fill in all fields.';
-            return;
-          }
-  
-          // Password confirmation
-          if (password !== confirmPassword) {
-            console.warn('Sign-Up: Passwords do not match.');
-            signupErrorDiv.textContent = 'Passwords do not match.';
-            return;
-          }
-  
-          // Password strength validation (minimum 6 characters as per Firebase)
-          if (password.length < 6) {
-            console.warn('Sign-Up: Weak password.');
-            signupErrorDiv.textContent = 'Password should be at least 6 characters.';
-            return;
-          }
-  
-          // Create user and assign default role (driver)
-          auth.createUserWithEmailAndPassword(email, password)
-            .then(userCredential => {
-              const user = userCredential.user;
-              console.log('User created:', user.email);
-              // Assign default role: driver
-              return database.ref(`users/${user.uid}`).set({
-                email: email,
-                roles: {
-                  driver: true // Default role
-                }
-              });
-            })
-            .then(() => {
-              // Send verification email
-              const user = auth.currentUser;
-              if (user) {
-                return user.sendEmailVerification();
-              }
-            })
-            .then(() => {
-              // Display success message
-              console.log('Verification email sent.');
-              signupSuccessDiv.textContent = 'Account created successfully! Please verify your email before signing in.';
-              // Optionally, redirect after a short delay
-              // setTimeout(() => {
-              //   window.location.href = 'index.html';
-              // }, 3000);
-            })
-            .catch(error => {
-              console.error('Sign-Up Error:', error);
-              handleAuthErrors(error, signupErrorDiv);
-            });
+          console.log('Navigating to Sign-Up page.');
+          window.location.href = 'signup.html';
         });
-      }
-  
-      // Function to handle and display Firebase authentication errors
-      function handleAuthErrors(error, displayDiv) {
-        let message = '';
-        switch (error.code) {
-          case 'auth/email-already-in-use':
-            message = 'This email is already in use.';
-            break;
-          case 'auth/invalid-email':
-            message = 'Invalid email address.';
-            break;
-          case 'auth/operation-not-allowed':
-            message = 'Operation not allowed. Please contact support.';
-            break;
-          case 'auth/weak-password':
-            message = 'Password is too weak.';
-            break;
-          case 'auth/user-disabled':
-            message = 'This user has been disabled.';
-            break;
-          case 'auth/user-not-found':
-            message = 'No user found with this email.';
-            break;
-          case 'auth/wrong-password':
-            message = 'Incorrect password.';
-            break;
-          default:
-            message = 'An error occurred. Please try again.';
-        }
-        displayDiv.textContent = message;
       }
     }
   
