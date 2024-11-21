@@ -22,38 +22,30 @@
     padding: 20px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+    position: relative;
   }
   
   header .logo {
     width: 50px;
+    margin-right: 10px;
   }
   
   header h1 {
-    font-size: 1.5em;
-  }
-  
-  header button {
-    padding: 10px 20px;
-    background-color: #e8491d;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    border-radius: 5px;
-  }
-  
-  header button:hover {
-    background-color: #cf3e16;
+    font-size: 1.8em;
   }
   
   main {
     flex: 1;
     padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   
   .auth-container, .signup-container {
     max-width: 400px;
-    margin: 0 auto;
+    width: 100%;
     background-color: #ffffff;
     padding: 30px;
     border-radius: 5px;
@@ -76,6 +68,7 @@
     margin-bottom: 15px;
     border: 1px solid #ccc;
     border-radius: 3px;
+    font-size: 1em;
   }
   
   .auth-container button, .signup-container button {
@@ -85,6 +78,7 @@
     color: #ffffff;
     cursor: pointer;
     border-radius: 3px;
+    font-size: 1em;
   }
   
   .auth-container button:hover, .signup-container button:hover {
@@ -93,6 +87,7 @@
   
   .auth-container p, .signup-container p {
     text-align: center;
+    margin-top: 10px;
   }
   
   .auth-container a, .signup-container a {
@@ -104,18 +99,16 @@
     text-decoration: underline;
   }
   
-  #map {
-    width: 100%;
-    height: 500px;
-    margin-top: 20px;
-    border: 2px solid #ccc;
-    border-radius: 5px;
+  #error-message, .error-message {
+    color: #e8491d;
+    margin-top: 10px;
+    text-align: center;
   }
   
-  #status {
+  .success-message {
+    color: #28a745;
+    margin-top: 10px;
     text-align: center;
-    margin-bottom: 10px;
-    font-weight: bold;
   }
   
   footer {
@@ -123,5 +116,16 @@
     color: #ffffff;
     text-align: center;
     padding: 10px;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 600px) {
+    header h1 {
+      font-size: 1.2em;
+    }
+  
+    .auth-container, .signup-container {
+      padding: 20px;
+    }
   }
   
