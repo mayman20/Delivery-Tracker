@@ -4,6 +4,7 @@
 if (!firebase.apps.length) {
     // Initialize Firebase if not already initialized
     firebase.initializeApp(firebaseConfig);
+    console.log('Firebase initialized.');
   } else {
     console.log('Firebase already initialized.');
   }
@@ -120,13 +121,13 @@ if (!firebase.apps.length) {
               console.log(`User role: ${storedRole}`);
               // Redirect based on role
               if (storedRole === 'driver') {
-                console.log('Redirecting to driver dashboard.');
+                console.log('Redirecting to Driver Dashboard.');
                 window.location.href = 'driver.html';
               } else if (storedRole === 'overseer') {
-                console.log('Redirecting to overseer dashboard.');
+                console.log('Redirecting to Overseer Dashboard.');
                 window.location.href = 'overseer.html';
               } else if (storedRole === 'admin') {
-                console.log('Redirecting to admin dashboard.');
+                console.log('Redirecting to Admin Dashboard.');
                 window.location.href = 'admin.html';
               } else {
                 console.warn('Undefined role encountered.');
@@ -404,6 +405,15 @@ if (!firebase.apps.length) {
         window.location.href = 'index.html';
       }
     });
+  
+    // Function to get user role
+    function getUserRole(userId) {
+      return database.ref(`users/${userId}/role`).once('value').then(snapshot => {
+        const role = snapshot.val();
+        console.log(`Fetched role for user ${userId}: ${role}`);
+        return role;
+      });
+    }
   
     // Handle Logout
     if (logoutButton) {
