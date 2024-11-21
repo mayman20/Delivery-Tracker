@@ -1,15 +1,13 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Delivery Driver Tracker</title>
+  <title>Delivery Driver Tracker - Login</title>
   <link rel="stylesheet" href="styles.css">
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-  <script src="firebase-config.js"></script>
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body id="index-page">
   <header>
@@ -19,28 +17,66 @@
 
   <main>
     <div class="auth-container">
-      <h2>Sign In</h2>
+      <!-- Sign-In Form -->
       <form id="login-form">
-        <input type="email" id="email" placeholder="Email" required>
-        <input type="password" id="password" placeholder="Password" required>
+        <h2>Sign In</h2>
+        <div>
+          <label for="email">Email:</label>
+          <input type="email" id="email" required>
+        </div>
+        <div>
+          <label for="password">Password:</label>
+          <input type="password" id="password" required>
+        </div>
+        <div>
+          <p>Select Role:</p>
+          <label>
+            <input type="radio" name="role" value="driver" checked>
+            Driver
+          </label>
+          <label>
+            <input type="radio" name="role" value="overseer">
+            Overseer
+          </label>
+        </div>
+        <div id="login-error" class="error-message"></div>
         <button type="submit">Sign In</button>
+        <p><a href="#" id="forgot-password-link">Forgot Password?</a></p>
+        <p>Don't have an account? <a href="#" id="signup-link">Sign Up</a></p>
       </form>
-      <p>Don't have an account? <a href="#" id="signup-link">Sign Up</a></p>
-      <p>Forgot your password? <a href="#" id="forgot-password-link">Reset Password</a></p>
-      <div id="login-error" class="error-message"></div>
-    </div>
 
-    <div class="signup-container" style="display: none;">
-      <h2>Sign Up</h2>
-      <form id="signup-form">
-        <input type="email" id="signup-email" placeholder="Email" required>
-        <input type="password" id="signup-password" placeholder="Password" required>
-        <input type="password" id="signup-confirm-password" placeholder="Confirm Password" required>
+      <!-- Sign-Up Form -->
+      <form id="signup-form" class="signup-container" style="display: none;">
+        <h2>Sign Up</h2>
+        <div>
+          <label for="signup-email">Email:</label>
+          <input type="email" id="signup-email" required>
+        </div>
+        <div>
+          <label for="signup-password">Password:</label>
+          <input type="password" id="signup-password" required>
+        </div>
+        <div>
+          <label for="signup-confirm-password">Confirm Password:</label>
+          <input type="password" id="signup-confirm-password" required>
+        </div>
+        <!-- Optional: Allow role selection during sign-up -->
+        <div>
+          <p>Select Role(s):</p>
+          <label>
+            <input type="checkbox" name="signup-role" value="driver" checked>
+            Driver
+          </label>
+          <label>
+            <input type="checkbox" name="signup-role" value="overseer">
+            Overseer
+          </label>
+        </div>
+        <div id="signup-error" class="error-message"></div>
+        <div id="signup-success" class="success-message"></div>
         <button type="submit">Sign Up</button>
+        <p>Already have an account? <a href="#" id="login-link">Sign In</a></p>
       </form>
-      <p>Already have an account? <a href="#" id="login-link">Sign In</a></p>
-      <div id="signup-error" class="error-message"></div>
-      <div id="signup-success" class="success-message"></div>
     </div>
   </main>
 
@@ -48,6 +84,15 @@
     <p>&copy; 2024 Delivery Driver Tracker</p>
   </footer>
 
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <!-- Firebase Configuration -->
+  <script src="firebase-config.js"></script>
+  <!-- Application JavaScript -->
   <script src="app.js"></script>
 </body>
 </html>

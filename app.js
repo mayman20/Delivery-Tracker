@@ -15,10 +15,10 @@ if (!firebase.apps.length) {
   
   // Utility function to get current user role
   function getUserRole(userId) {
-    return database.ref(`users/${userId}/role`).once('value').then(snapshot => {
-      const role = snapshot.val();
-      console.log(`Fetched role for user ${userId}: ${role}`);
-      return role;
+    return database.ref(`users/${userId}/roles`).once('value').then(snapshot => {
+      const roles = snapshot.val();
+      console.log(`Fetched roles for user ${userId}: ${JSON.stringify(roles)}`);
+      return roles;
     });
   }
   
@@ -90,13 +90,17 @@ if (!firebase.apps.length) {
         clearMessages();
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
-  
-        console.log(`Attempting to sign in user: ${email}`);
+        
+        // Get selected role
+        const roleRadios = document.querySelectorAll('input[name="role"]:checked');
+        const selectedRole = roleRadios.length > 0 ? roleRadios[0].value : null;
+        
+        console.log(`Attempting to sign in user: ${email} as ${selectedRole}`);
   
         // Basic validation
-        if (!email || !password) {
-          console.warn('Sign-In: Missing email or password.');
-          loginErrorDiv.textContent = 'Please fill in all fields.';
+        if (!email || !password || !selectedRole) {
+          console.warn('Sign-In: Missing email, password, or role.');
+          loginErrorDiv.textContent = 'Please fill in all fields and select a role.';
           return;
         }
   
@@ -110,28 +114,27 @@ if (!firebase.apps.length) {
               auth.signOut();
               return;
             }
-            // Retrieve the user's role from the database
-            getUserRole(user.uid).then(storedRole => {
-              if (!storedRole) {
-                console.warn('User role not assigned.');
-                loginErrorDiv.textContent = 'No role assigned. Please contact support.';
-                auth.signOut();
-                return;
-              }
-              console.log(`User role: ${storedRole}`);
-              // Redirect based on role
-              if (storedRole === 'driver') {
-                console.log('Redirecting to Driver Dashboard.');
-                window.location.href = 'driver.html';
-              } else if (storedRole === 'overseer') {
-                console.log('Redirecting to Overseer Dashboard.');
-                window.location.href = 'overseer.html';
-              } else if (storedRole === 'admin') {
-                console.log('Redirecting to Admin Dashboard.');
-                window.location.href = 'admin.html';
+            // Retrieve the user's roles from the database
+            database.ref(`users/${user.uid}/roles`).once('value').then(snapshot => {
+              const userRoles = snapshot.val();
+              console.log(`User roles: ${JSON.stringify(userRoles)}`);
+              if (userRoles && userRoles[selectedRole]) {
+                // User has the selected role
+                if (selectedRole === 'driver') {
+                  console.log('Redirecting to Driver Dashboard.');
+                  window.location.href = 'driver.html';
+                } else if (selectedRole === 'overseer') {
+                  console.log('Redirecting to Overseer Dashboard.');
+                  window.location.href = 'overseer.html';
+                } else {
+                  console.warn('Undefined role selected.');
+                  loginErrorDiv.textContent = 'Undefined role selected. Please contact support.';
+                  auth.signOut();
+                }
               } else {
-                console.warn('Undefined role encountered.');
-                loginErrorDiv.textContent = 'Undefined role. Please contact support.';
+                // User does not have the selected role
+                console.warn(`User does not have the role: ${selectedRole}`);
+                loginErrorDiv.textContent = `You do not have the '${selectedRole}' role. Please contact support.`;
                 auth.signOut();
               }
             });
@@ -152,7 +155,11 @@ if (!firebase.apps.length) {
         const password = document.getElementById('signup-password').value;
         const confirmPassword = document.getElementById('signup-confirm-password').value;
   
-        console.log(`Attempting to sign up user: ${email}`);
+        // Collect selected roles
+        const roleCheckboxes = document.querySelectorAll('input[name="signup-role"]:checked');
+        const selectedRoles = Array.from(roleCheckboxes).map(checkbox => checkbox.value);
+        
+        console.log(`Attempting to sign up user: ${email} with roles: ${selectedRoles}`);
   
         // Basic validation
         if (!email || !password || !confirmPassword) {
@@ -175,14 +182,26 @@ if (!firebase.apps.length) {
           return;
         }
   
+        // Validate that at least one role is selected
+        if (selectedRoles.length === 0) {
+          console.warn('Sign-Up: No roles selected.');
+          signupErrorDiv.textContent = 'Please select at least one role.';
+          return;
+        }
+  
+        // Create user
         auth.createUserWithEmailAndPassword(email, password)
           .then(userCredential => {
             const user = userCredential.user;
             console.log('User created:', user.email);
-            // Assign a default role (e.g., 'driver') or handle role assignment separately
+            // Assign selected roles
+            const rolesObject = {};
+            selectedRoles.forEach(role => {
+              rolesObject[role] = true;
+            });
             return database.ref(`users/${user.uid}`).set({
               email: email,
-              role: 'driver' // Assign default role
+              roles: rolesObject
             });
           })
           .then(() => {
@@ -350,7 +369,7 @@ if (!firebase.apps.length) {
       if (user) {
         // Verify that the user is an overseer
         getUserRole(user.uid).then(role => {
-          if (role !== 'overseer') {
+          if (!role || !role.overseer) {
             console.warn('Access denied. User is not an overseer.');
             alert('Access denied. Only overseers can view driver locations.');
             auth.signOut();
@@ -408,9 +427,9 @@ if (!firebase.apps.length) {
   
     // Function to get user role
     function getUserRole(userId) {
-      return database.ref(`users/${userId}/role`).once('value').then(snapshot => {
+      return database.ref(`users/${userId}/roles`).once('value').then(snapshot => {
         const role = snapshot.val();
-        console.log(`Fetched role for user ${userId}: ${role}`);
+        console.log(`Fetched roles for user ${userId}: ${JSON.stringify(role)}`);
         return role;
       });
     }
