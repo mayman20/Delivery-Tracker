@@ -3,18 +3,38 @@
 body {
   font-family: Arial, sans-serif;
   background-color: #f5f5f5;
+  margin: 0;
+  padding: 0;
 }
 
 header {
   background-color: #007bff;
   color: white;
   padding: 20px;
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.logo {
-  width: 50px;
-  vertical-align: middle;
+header h1 {
+  margin: 0;
+}
+
+header button {
+  padding: 10px 20px;
+  background-color: #dc3545;
+  border: none;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+header button:hover {
+  background-color: #c82333;
+}
+
+main {
+  padding: 20px;
 }
 
 .auth-container {
@@ -45,7 +65,7 @@ header {
 .auth-container form button {
   width: 100%;
   padding: 10px;
-  background-color: #007bff;
+  background-color: #28a745;
   color: white;
   border: none;
   border-radius: 4px;
@@ -53,7 +73,7 @@ header {
 }
 
 .auth-container form button:hover {
-  background-color: #0056b3;
+  background-color: #218838;
 }
 
 .error-message {
@@ -74,4 +94,10 @@ footer {
   position: fixed;
   width: 100%;
   bottom: 0;
+}
+
+#map {
+  height: 500px;
+  width: 100%;
+  margin-top: 20px;
 }

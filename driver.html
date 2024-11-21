@@ -6,33 +6,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Driver Dashboard - Delivery Driver Tracker</title>
   <link rel="stylesheet" href="styles.css">
-  <!-- Leaflet CSS (Integrity removed) -->
+  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <!-- Firebase SDKs -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-  <script src="firebase-config.js"></script>
 </head>
 <body id="driver-page">
   <header>
-    <img src="assets/images/logo.png" alt="Logo" class="logo">
     <h1>Driver Dashboard</h1>
     <button id="logout-button">Logout</button>
   </header>
 
   <main>
-    <div id="status">Fetching your location...</div>
-    <div id="map"></div>
+    <div id="status">Initializing...</div>
+    <div id="map" style="height: 500px;"></div>
   </main>
 
   <footer>
     <p>&copy; 2024 Delivery Driver Tracker</p>
   </footer>
 
-  <!-- Leaflet JS (Integrity removed) -->
+  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <!-- Firebase Configuration -->
+  <script src="firebase-config.js"></script>
+  <!-- Application JavaScript -->
   <script src="app.js"></script>
 </body>
 </html>
