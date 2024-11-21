@@ -7,6 +7,14 @@ body {
   padding: 0;
 }
 
+#logo {
+  width: 150px;       /* Adjust as needed */
+  height: auto;
+  max-width: 100%;
+  display: block;     /* Centers the logo if the container has text-align: center */
+  margin: 0 auto;     /* Centers the logo horizontally */
+}
+
 header {
   background-color: #007bff;
   color: white;
