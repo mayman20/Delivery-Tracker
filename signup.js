@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
             email: email,
             roles: {
               driver: true,     // Default role
-              overseer: false   // Can be updated manually by admin
+              overseer: true   // Can be updated manually by admin
             }
           });
         })
