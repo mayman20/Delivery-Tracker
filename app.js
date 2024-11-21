@@ -4,6 +4,8 @@
 if (!firebase.apps.length) {
     // Initialize Firebase if not already initialized
     firebase.initializeApp(firebaseConfig);
+  } else {
+    console.log('Firebase already initialized.');
   }
   
   // Reference to Firebase services
@@ -12,11 +14,16 @@ if (!firebase.apps.length) {
   
   // Utility function to get current user role
   function getUserRole(userId) {
-    return database.ref(`users/${userId}/role`).once('value').then(snapshot => snapshot.val());
+    return database.ref(`users/${userId}/role`).once('value').then(snapshot => {
+      const role = snapshot.val();
+      console.log(`Fetched role for user ${userId}: ${role}`);
+      return role;
+    });
   }
   
   // Detect Current Page
   const page = document.body.id;
+  console.log(`Current page: ${page}`);
   
   // Landing Page: Handle Sign In and Sign Up
   if (page === 'index-page') {
@@ -34,6 +41,7 @@ if (!firebase.apps.length) {
     // Toggle between login and signup forms
     signupLink.addEventListener('click', (e) => {
       e.preventDefault();
+      console.log('Switching to Sign-Up form.');
       authContainer.style.display = 'none';
       signupContainer.style.display = 'block';
       clearMessages();
@@ -41,6 +49,7 @@ if (!firebase.apps.length) {
   
     loginLink.addEventListener('click', (e) => {
       e.preventDefault();
+      console.log('Switching to Sign-In form.');
       signupContainer.style.display = 'none';
       authContainer.style.display = 'block';
       clearMessages();
@@ -50,13 +59,16 @@ if (!firebase.apps.length) {
     if (forgotPasswordLink) {
       forgotPasswordLink.addEventListener('click', (e) => {
         e.preventDefault();
+        console.log('Forgot Password clicked.');
         const email = prompt('Please enter your email for password reset:');
         if (email) {
           auth.sendPasswordResetEmail(email)
             .then(() => {
               alert('Password reset email sent! Please check your inbox.');
+              console.log('Password reset email sent to:', email);
             })
             .catch(error => {
+              console.error('Error sending password reset email:', error);
               handleAuthErrors(error, loginErrorDiv);
             });
         }
@@ -78,12 +90,11 @@ if (!firebase.apps.length) {
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
   
-        // Debugging Log
-        console.log('Sign-In form submitted');
-        console.log(`Email: ${email}`);
+        console.log(`Attempting to sign in user: ${email}`);
   
         // Basic validation
         if (!email || !password) {
+          console.warn('Sign-In: Missing email or password.');
           loginErrorDiv.textContent = 'Please fill in all fields.';
           return;
         }
@@ -91,7 +102,9 @@ if (!firebase.apps.length) {
         auth.signInWithEmailAndPassword(email, password)
           .then(userCredential => {
             const user = userCredential.user;
+            console.log('User signed in:', user.email);
             if (!user.emailVerified) {
+              console.warn('User email not verified.');
               loginErrorDiv.textContent = 'Please verify your email before signing in.';
               auth.signOut();
               return;
@@ -99,25 +112,31 @@ if (!firebase.apps.length) {
             // Retrieve the user's role from the database
             getUserRole(user.uid).then(storedRole => {
               if (!storedRole) {
-                // If no role is assigned, handle accordingly
+                console.warn('User role not assigned.');
                 loginErrorDiv.textContent = 'No role assigned. Please contact support.';
                 auth.signOut();
                 return;
               }
+              console.log(`User role: ${storedRole}`);
               // Redirect based on role
               if (storedRole === 'driver') {
+                console.log('Redirecting to driver dashboard.');
                 window.location.href = 'driver.html';
               } else if (storedRole === 'overseer') {
+                console.log('Redirecting to overseer dashboard.');
                 window.location.href = 'overseer.html';
+              } else if (storedRole === 'admin') {
+                console.log('Redirecting to admin dashboard.');
+                window.location.href = 'admin.html';
               } else {
-                // Handle undefined roles
+                console.warn('Undefined role encountered.');
                 loginErrorDiv.textContent = 'Undefined role. Please contact support.';
                 auth.signOut();
               }
             });
           })
           .catch(error => {
-            // Handle Firebase authentication errors
+            console.error('Sign-In Error:', error);
             handleAuthErrors(error, loginErrorDiv);
           });
       });
@@ -132,24 +151,25 @@ if (!firebase.apps.length) {
         const password = document.getElementById('signup-password').value;
         const confirmPassword = document.getElementById('signup-confirm-password').value;
   
-        // Debugging Log
-        console.log('Sign-Up form submitted');
-        console.log(`Email: ${email}`);
+        console.log(`Attempting to sign up user: ${email}`);
   
         // Basic validation
         if (!email || !password || !confirmPassword) {
+          console.warn('Sign-Up: Missing fields.');
           signupErrorDiv.textContent = 'Please fill in all fields.';
           return;
         }
   
         // Password confirmation
         if (password !== confirmPassword) {
+          console.warn('Sign-Up: Passwords do not match.');
           signupErrorDiv.textContent = 'Passwords do not match.';
           return;
         }
   
         // Password strength validation (minimum 6 characters as per Firebase)
         if (password.length < 6) {
+          console.warn('Sign-Up: Weak password.');
           signupErrorDiv.textContent = 'Password should be at least 6 characters.';
           return;
         }
@@ -157,6 +177,7 @@ if (!firebase.apps.length) {
         auth.createUserWithEmailAndPassword(email, password)
           .then(userCredential => {
             const user = userCredential.user;
+            console.log('User created:', user.email);
             // Assign a default role (e.g., 'driver') or handle role assignment separately
             return database.ref(`users/${user.uid}`).set({
               email: email,
@@ -172,6 +193,7 @@ if (!firebase.apps.length) {
           })
           .then(() => {
             // Display success message
+            console.log('Verification email sent.');
             signupSuccessDiv.textContent = 'Account created successfully! Please verify your email before signing in.';
             // Optionally, redirect after a short delay
             // setTimeout(() => {
@@ -179,7 +201,7 @@ if (!firebase.apps.length) {
             // }, 3000);
           })
           .catch(error => {
-            // Handle Firebase authentication errors
+            console.error('Sign-Up Error:', error);
             handleAuthErrors(error, signupErrorDiv);
           });
       });
@@ -230,29 +252,35 @@ if (!firebase.apps.length) {
     auth.onAuthStateChanged(user => {
       if (user) {
         driverId = user.uid;
+        console.log(`Driver logged in: ${user.email}, UID: ${driverId}`);
         statusDiv.textContent = 'Fetching your location...';
   
         // Initialize Map (optional: show driver's own location)
         map = L.map('map').setView([0, 0], 2); // Default view
+        console.log('Map initialized.');
   
         // Add OpenStreetMap tiles
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '© OpenStreetMap contributors'
         }).addTo(map);
+        console.log('Leaflet tiles added to map.');
   
         // Request Geolocation
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(position => {
             const { latitude, longitude } = position.coords;
+            console.log('Initial location fetched:', latitude, longitude);
             updateLocation(latitude, longitude);
             map.setView([latitude, longitude], 13);
             marker = L.marker([latitude, longitude]).addTo(map)
               .bindPopup('You are here.').openPopup();
+            console.log('Marker added to map.');
   
             // Update location every minute
             locationInterval = setInterval(() => {
               navigator.geolocation.getCurrentPosition(pos => {
                 const { latitude, longitude } = pos.coords;
+                console.log('Periodic location update:', latitude, longitude);
                 updateLocation(latitude, longitude);
                 map.setView([latitude, longitude], 13);
                 marker.setLatLng([latitude, longitude]);
@@ -263,9 +291,11 @@ if (!firebase.apps.length) {
             }, 60000); // 60000ms = 1 minute
   
           }, error => {
+            console.error('Geolocation error:', error);
             statusDiv.textContent = 'Error fetching location: ' + error.message;
           });
         } else {
+          console.error('Geolocation not supported.');
           statusDiv.textContent = 'Geolocation is not supported by your browser.';
         }
   
@@ -276,13 +306,18 @@ if (!firebase.apps.length) {
             latitude: lat,
             longitude: lng,
             timestamp: firebase.database.ServerValue.TIMESTAMP
-          }).catch(error => {
-            console.error('Error updating location:', error);
+          })
+          .then(() => {
+            console.log('Location updated in Firebase:', lat, lng);
+          })
+          .catch(error => {
+            console.error('Error updating location in Firebase:', error);
             statusDiv.textContent = 'Error updating location.';
           });
         }
       } else {
         // No user is signed in, redirect to landing page
+        console.warn('No user is signed in. Redirecting to sign-in page.');
         window.location.href = 'index.html';
       }
     });
@@ -291,9 +326,12 @@ if (!firebase.apps.length) {
     if (logoutButton) {
       logoutButton.addEventListener('click', () => {
         auth.signOut().then(() => {
+          console.log('User signed out.');
           // Clear interval
           if (locationInterval) clearInterval(locationInterval);
           window.location.href = 'index.html';
+        }).catch(error => {
+          console.error('Error signing out:', error);
         });
       });
     }
@@ -312,23 +350,29 @@ if (!firebase.apps.length) {
         // Verify that the user is an overseer
         getUserRole(user.uid).then(role => {
           if (role !== 'overseer') {
+            console.warn('Access denied. User is not an overseer.');
             alert('Access denied. Only overseers can view driver locations.');
             auth.signOut();
             window.location.href = 'index.html';
             return;
           }
   
+          console.log('Overseer logged in:', user.email);
+  
           // Initialize Map
           map = L.map('map').setView([0, 0], 2); // Default view
+          console.log('Map initialized.');
   
           // Add OpenStreetMap tiles
           L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
           }).addTo(map);
+          console.log('Leaflet tiles added to map.');
   
           // Listen for drivers' location updates
           database.ref('drivers').on('value', snapshot => {
             const drivers = snapshot.val();
+            console.log('Drivers data fetched:', drivers);
             if (drivers) {
               statusDiv.textContent = 'Viewing all drivers.';
               for (const [id, data] of Object.entries(drivers)) {
@@ -356,20 +400,19 @@ if (!firebase.apps.length) {
         });
       } else {
         // No user is signed in, redirect to landing page
+        console.warn('No user is signed in. Redirecting to sign-in page.');
         window.location.href = 'index.html';
       }
     });
-  
-    // Function to get user role
-    function getUserRole(userId) {
-      return database.ref(`users/${userId}/role`).once('value').then(snapshot => snapshot.val());
-    }
   
     // Handle Logout
     if (logoutButton) {
       logoutButton.addEventListener('click', () => {
         auth.signOut().then(() => {
+          console.log('User signed out.');
           window.location.href = 'index.html';
+        }).catch(error => {
+          console.error('Error signing out:', error);
         });
       });
     }
