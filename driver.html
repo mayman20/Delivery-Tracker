@@ -8,6 +8,18 @@
   <link rel="stylesheet" href="styles.css">
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    /* Toggle Switch Styles */
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      margin: 10px 0;
+    }
+    .toggle-container label {
+      margin-left: 10px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body id="driver-page">
   <header>
@@ -17,6 +29,10 @@
 
   <main>
     <div id="status">Initializing...</div>
+    <div class="toggle-container">
+      <input type="checkbox" id="status-toggle">
+      <label for="status-toggle">All Deliveries Completed</label>
+    </div>
     <div id="map" style="height: 500px;"></div>
   </main>
 
