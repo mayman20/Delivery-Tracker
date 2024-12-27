@@ -131,10 +131,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Check if the selected role matches the roles in the database
                 if (selectedRole === 'driver' && userRoles.driver) {
                   console.log('Redirecting to Driver Dashboard.');
-                  window.location.href = 'driver.html';
+                  window.location.href = 'https://mayman20.github.io/Delivery-Tracker/driver.html';
                 } else if (selectedRole === 'overseer' && userRoles.overseer) {
                   console.log('Redirecting to Overseer Dashboard.');
-                  window.location.href = 'overseer.html';
+                  window.location.href = 'https://mayman20.github.io/Delivery-Tracker/overseer.html';
                 } else {
                   console.warn('Selected role does not match database roles.');
                   loginErrorDiv.textContent = 'Role mismatch. Please select a valid role or contact support.';
