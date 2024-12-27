@@ -14,17 +14,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Define custom Leaflet icons
   const redIcon = new L.Icon({
-      iconUrl: 'https://maps.gstatic.com/mapfiles/ms2/micons/red-dot.png',
-      iconSize: [32, 32],
-      iconAnchor: [16, 32],
-      popupAnchor: [0, -32],
+    iconUrl: 'https://maps.gstatic.com/mapfiles/ms2/micons/red-dot.png',
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32],
   });
 
   const greenIcon = new L.Icon({
-      iconUrl: 'https://maps.gstatic.com/mapfiles/ms2/micons/green-dot.png',
-      iconSize: [32, 32],
-      iconAnchor: [16, 32],
-      popupAnchor: [0, -32],
+    iconUrl: 'https://maps.gstatic.com/mapfiles/ms2/micons/green-dot.png',
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32],
   });
 
   // Utility function to get user roles
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const signupLink = document.getElementById('signup-link');
     const loginErrorDiv = document.getElementById('login-error');
     const forgotPasswordLink = document.getElementById('forgot-password-link');
-  
+
     // Handle Forgot Password
     if (forgotPasswordLink) {
       forgotPasswordLink.addEventListener('click', (e) => {
@@ -101,13 +101,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
-        
-        console.log(`Attempting to sign in user: ${email}`);
+        // Capture the selected role (driver/overseer)
+        const selectedRole = document.querySelector('input[name="role"]:checked')?.value || '';
+
+        console.log(`Attempting to sign in user: ${email} with selected role: ${selectedRole}`);
 
         // Basic validation
-        if (!email || !password) {
-          console.warn('Sign-In: Missing email or password.');
-          loginErrorDiv.textContent = 'Please fill in all fields.';
+        if (!email || !password || !selectedRole) {
+          console.warn('Sign-In: Missing email, password, or role.');
+          loginErrorDiv.textContent = 'Please fill in all fields and select a role.';
           return;
         }
 
@@ -115,24 +117,27 @@ document.addEventListener('DOMContentLoaded', () => {
           .then(userCredential => {
             const user = userCredential.user;
             console.log('User signed in:', user.email);
+
             if (!user.emailVerified) {
               console.warn('User email not verified.');
               loginErrorDiv.textContent = 'Please verify your email before signing in.';
               auth.signOut();
               return;
             }
+
             // Retrieve the user's roles from the database
             getUserRoles(user.uid).then(userRoles => {
               if (userRoles) {
-                if (userRoles.driver) {
+                // Check if the selected role matches the roles in the database
+                if (selectedRole === 'driver' && userRoles.driver) {
                   console.log('Redirecting to Driver Dashboard.');
                   window.location.href = 'driver.html';
-                } else if (userRoles.overseer) {
+                } else if (selectedRole === 'overseer' && userRoles.overseer) {
                   console.log('Redirecting to Overseer Dashboard.');
                   window.location.href = 'overseer.html';
                 } else {
-                  console.warn('No valid roles assigned.');
-                  loginErrorDiv.textContent = 'No valid roles assigned. Please contact support.';
+                  console.warn('Selected role does not match database roles.');
+                  loginErrorDiv.textContent = 'Role mismatch. Please select a valid role or contact support.';
                   auth.signOut();
                 }
               } else {
@@ -167,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (page === 'driver-page') {
     const statusDiv = document.getElementById('status');
     const logoutButton = document.getElementById('logout-button');
-    const statusToggle = document.getElementById('status-toggle'); // New toggle element
+    const statusToggle = document.getElementById('status-toggle');
 
     let driverId = null;
     let locationInterval = null;
@@ -217,8 +222,11 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Initial location fetched:', latitude, longitude);
             updateLocation(latitude, longitude);
             map.setView([latitude, longitude], 13);
-            marker = L.marker([latitude, longitude], { icon: statusToggle.checked ? greenIcon : redIcon }).addTo(map)
-              .bindPopup('You are here.<br>Status: ' + (statusToggle.checked ? 'Deliveries Completed' : 'Active')).openPopup();
+            marker = L.marker([latitude, longitude], {
+              icon: statusToggle.checked ? greenIcon : redIcon
+            }).addTo(map)
+              .bindPopup('You are here.<br>Status: ' + (statusToggle.checked ? 'Deliveries Completed' : 'Active'))
+              .openPopup();
             console.log('Marker added to map.');
 
             // Update location every minute
@@ -252,7 +260,9 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log(`Driver status updated: ${status}`);
             if (marker) {
               marker.setIcon(status === 'green' ? greenIcon : redIcon);
-              marker.getPopup().setContent(`You are here.<br>Status: ${status === 'green' ? 'Deliveries Completed' : 'Active'}`);
+              marker.getPopup().setContent(
+                `You are here.<br>Status: ${status === 'green' ? 'Deliveries Completed' : 'Active'}`
+              );
             }
           }
         });
@@ -276,7 +286,9 @@ document.addEventListener('DOMContentLoaded', () => {
             // Update the marker icon immediately
             if (marker) {
               marker.setIcon(statusToggle.checked ? greenIcon : redIcon);
-              marker.getPopup().setContent(`You are here.<br>Status: ${statusToggle.checked ? 'Deliveries Completed' : 'Active'}`);
+              marker.getPopup().setContent(
+                `You are here.<br>Status: ${statusToggle.checked ? 'Deliveries Completed' : 'Active'}`
+              );
             }
             // Update status in Firebase
             database.ref(`drivers/${driverId}/status`).set(statusToggle.checked ? 'green' : 'red')
@@ -355,12 +367,19 @@ document.addEventListener('DOMContentLoaded', () => {
               for (const [id, data] of Object.entries(drivers)) {
                 const { latitude, longitude, timestamp, status } = data;
                 if (markers[id]) {
+                  // Update existing marker
                   markers[id].setLatLng([latitude, longitude]);
                   markers[id].setIcon(status === 'green' ? greenIcon : redIcon);
-                  markers[id].getPopup().setContent(`Driver ID: ${id}<br>Last Updated: ${new Date(timestamp).toLocaleString()}<br>Status: ${status === 'green' ? 'Deliveries Completed' : 'Active'}`);
+                  markers[id].getPopup().setContent(
+                    `Driver ID: ${id}<br>Last Updated: ${new Date(timestamp).toLocaleString()}<br>Status: ${status === 'green' ? 'Deliveries Completed' : 'Active'}`
+                  );
                 } else {
-                  markers[id] = L.marker([latitude, longitude], { icon: status === 'green' ? greenIcon : redIcon }).addTo(map)
-                    .bindPopup(`Driver ID: ${id}<br>Last Updated: ${new Date(timestamp).toLocaleString()}<br>Status: ${status === 'green' ? 'Deliveries Completed' : 'Active'}`);
+                  // Create a new marker
+                  markers[id] = L.marker([latitude, longitude], { icon: status === 'green' ? greenIcon : redIcon })
+                    .addTo(map)
+                    .bindPopup(
+                      `Driver ID: ${id}<br>Last Updated: ${new Date(timestamp).toLocaleString()}<br>Status: ${status === 'green' ? 'Deliveries Completed' : 'Active'}`
+                    );
                 }
               }
             } else {
